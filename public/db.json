@@ -1,0 +1,253 @@
+{
+  "properties": [
+    {
+      "id": "1",
+      "title": "Luxury Villa in Beverly Hills",
+      "price": 5500000,
+      "location": "Beverly Hills, CA",
+      "mapLocation": "Beverly Hills, CA 90210, USA",
+      "area": "Beverly Hills",
+      "region": "Los Angeles",
+      "description": "An exquisite luxury villa featuring breathtaking views, a private infinity pool, and world-class amenities. This architectural masterpiece offers the pinnacle of California living.",
+      "beds": 6,
+      "baths": 8,
+      "sqft": 8500,
+      "type": "House",
+      "status": "For Sale",
+      "featured": true,
+      "yearBuilt": 2022,
+      "vehicleSpaces": 4,
+      "listingId": "BH-90210",
+      "updateDate": "March 15, 2024",
+      "images": [
+        "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "agent": {
+        "name": "Sarah Jenkins",
+        "image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200"
+      }
+    },
+    {
+      "id": "2",
+      "title": "Modern Penthouse Manhattan",
+      "price": 3200000,
+      "location": "Manhattan, NY",
+      "mapLocation": "Upper East Side, New York, NY, USA",
+      "area": "Upper East Side",
+      "region": "Manhattan",
+      "description": "Experience skyline living in this stunning Manhattan penthouse. Features floor-to-ceiling windows, a wraparound terrace, and custom Italian finishes throughout.",
+      "beds": 3,
+      "baths": 3.5,
+      "sqft": 2800,
+      "type": "Apartment",
+      "status": "For Sale",
+      "featured": true,
+      "yearBuilt": 2021,
+      "vehicleSpaces": 1,
+      "listingId": "NY-7721",
+      "updateDate": "March 12, 2024",
+      "images": [
+        "https://images.unsplash.com/photo-1567496898669-ee935f5f647a?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "agent": {
+        "name": "Michael Chen",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"
+      }
+    },
+    {
+      "id": "3",
+      "title": "Charming Beachfront Cottage",
+      "price": 1800,
+      "location": "Malibu, CA",
+      "mapLocation": "Malibu, CA 90265, USA",
+      "area": "Carbon Beach",
+      "region": "Los Angeles",
+      "description": "Wake up to the sound of waves in this cozy beachfront cottage. Perfect for weekend getaways or long-term coastal living.",
+      "beds": 2,
+      "baths": 2,
+      "sqft": 1400,
+      "type": "House",
+      "status": "For Rent",
+      "featured": false,
+      "yearBuilt": 1995,
+      "vehicleSpaces": 2,
+      "listingId": "MAL-4412",
+      "updateDate": "March 10, 2024",
+      "images": [
+        "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "agent": {
+        "name": "Emma Collins",
+        "image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200"
+      }
+    },
+    {
+      "id": "4",
+      "title": "Modern two bedroom apartment",
+      "price": 1500,
+      "location": "New York, NY, USA",
+      "mapLocation": "New York, NY 10001, USA",
+      "area": "Manhattan",
+      "region": "Manhattan",
+      "description": "Chic urban living in this newly renovated two-bedroom apartment. Perfect for young professionals looking for a stylish home close to transport links.",
+      "beds": 3,
+      "baths": 1,
+      "sqft": 850,
+      "type": "Apartment",
+      "status": "For Rent",
+      "featured": true,
+      "yearBuilt": 2021,
+      "vehicleSpaces": 2,
+      "listingId": "6001",
+      "updateDate": "March 10, 2026",
+      "images": [
+        "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "agent": {
+        "name": "Ashley Johnson",
+        "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200"
+      }
+    },
+    {
+      "id": "5",
+      "title": "Studio apartment",
+      "price": 1500000,
+      "location": "New York, NY, USA",
+      "mapLocation": "New York, NY 10001, USA",
+      "area": "Manhattan",
+      "region": "Manhattan",
+      "description": "Experience the best with our premium listing. Studio apartment with modern finishes.",
+      "beds": 3,
+      "baths": 1,
+      "sqft": 9450,
+      "type": "Apartment",
+      "status": "For Sale",
+      "featured": true,
+      "yearBuilt": 2021,
+      "vehicleSpaces": 2,
+      "listingId": "6002",
+      "updateDate": "March 11, 2026",
+      "images": [
+        "https://images.unsplash.com/photo-1600607687940-c52af049e6d0?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1600566753190-17f0bcd2a6c4?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "agent": {
+        "name": "Ashley Johnson",
+        "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200"
+      }
+    },
+    {
+      "id": "6",
+      "title": "Bright Attic Apartment",
+      "price": 1300000,
+      "location": "Los Angeles, CA, USA",
+      "mapLocation": "Los Angeles, CA 90001, USA",
+      "area": "Flushing",
+      "region": "Queens",
+      "description": "Experience the best with our premium listing. Bright and airy attic apartment.",
+      "beds": 3,
+      "baths": 2,
+      "sqft": 6000,
+      "type": "Apartment",
+      "status": "For Sale",
+      "featured": true,
+      "yearBuilt": 2018,
+      "vehicleSpaces": 4,
+      "listingId": "5807",
+      "updateDate": "December 13, 2025",
+      "images": [
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "agent": {
+        "name": "Marie Dubois",
+        "image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200"
+      }
+    },
+    {
+      "id": "7",
+      "title": "Centrally Located Apartment",
+      "price": 490,
+      "location": "Osaka, Japan",
+      "mapLocation": "Osaka, JP 530-0001",
+      "area": "Chuo Ward",
+      "region": "Brooklyn",
+      "description": "Affordable and centrally located apartment.",
+      "beds": 4,
+      "baths": 2,
+      "sqft": 350,
+      "type": "Apartment",
+      "status": "For Rent",
+      "featured": true,
+      "yearBuilt": 2015,
+      "vehicleSpaces": 0,
+      "listingId": "7721",
+      "updateDate": "April 05, 2026",
+      "images": [
+        "https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "agent": {
+        "name": "Michael Chen",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"
+      }
+    },
+    {
+      "id": "10",
+      "title": "Luxury Office Suite",
+      "price": 12000,
+      "location": "Financial District",
+      "mapLocation": "New York, NY 10005, USA",
+      "area": "FiDi",
+      "region": "Manhattan",
+      "description": "Premium office space in a world-class building. High-speed connectivity and luxury amenities included.",
+      "beds": 0,
+      "baths": 2,
+      "sqft": 3500,
+      "type": "Office",
+      "status": "For Rent",
+      "featured": true,
+      "yearBuilt": 2012,
+      "vehicleSpaces": 10,
+      "listingId": "2234",
+      "updateDate": "February 15, 2026",
+      "images": [
+        "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "agent": {
+        "name": "James Okafor",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200"
+      }
+    },
+    {
+      "id": "11",
+      "title": "Industrial Warehouse",
+      "price": 5500000,
+      "location": "Long Island City",
+      "mapLocation": "Queens, NY 11101, USA",
+      "area": "LIC",
+      "region": "Queens",
+      "description": "Huge open-concept industrial loft with polished concrete floors and exposed brick. Ideal for modern living or creative work.",
+      "beds": 1,
+      "baths": 2,
+      "sqft": 12000,
+      "type": "Industrial",
+      "status": "For Sale",
+      "featured": true,
+      "yearBuilt": 1980,
+      "vehicleSpaces": 20,
+      "listingId": "8812",
+      "updateDate": "January 20, 2026",
+      "images": [
+        "https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "agent": {
+        "name": "Sarah Mitchell",
+        "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200"
+      }
+    }
+  ]
+}
