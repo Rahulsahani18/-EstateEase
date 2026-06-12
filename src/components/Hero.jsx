@@ -1,26 +1,48 @@
-import { motion, AnimatePresence } from 'motion/react';
-import { Search, MapPin, Building2, CircleDollarSign, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setSearchFilters } from '../store/slices/propertySlice';
+// src/components/Hero.jsx
+import { motion } from 'motion/react';
+import { ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import HeroImg from '../../public/assets/j1o.jpg';
 
-const propertyTypes = ['Apartment', 'House', 'Office', 'Industrial'];
-const regions = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'];
-
-export default function Hero({ onSearch }) {
-  const dispatch = useDispatch();
-  const searchFilters = useSelector((state) => state.properties.searchFilters);
-  const [activeTab, setActiveTab] = useState(searchFilters.status || 'All');
+export default function Hero() {
+  const navigate = useNavigate();
+  
+  // Get data from Redux store
+  const propertyTypesState = useSelector((state) => state.propertyTypes);
+  const locationsState = useSelector((state) => state.locations);
+  
+  const propertyTypes = propertyTypesState.data || [];
+  const locations = locationsState.data || [];
+  
+  // Local state for filters
+  const [filters, setFilters] = useState({
+    status: 'All',
+    region: 'Location',
+    type: 'Property Type',
+    minPrice: '',
+    maxPrice: '',
+  });
+  
+  const [activeTab, setActiveTab] = useState('All');
 
   const handleTabChange = (status) => {
     setActiveTab(status);
-    dispatch(setSearchFilters({ status }));
+    setFilters(prev => ({ ...prev, status }));
   };
 
   const handleFilterChange = (updates) => {
-    dispatch(setSearchFilters(updates));
+    setFilters(prev => ({ ...prev, ...updates }));
   };
+
+  const handleSearch = () => {
+    // Navigate to search page with filters in state
+    navigate('/search', { state: { searchFilters: filters } });
+  };
+
+  const allPropertyTypes = Array.isArray(propertyTypes) ? propertyTypes : [];
+  const allLocations = Array.isArray(locations) ? locations.map(loc => loc.title) : [];
 
   return (
     <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
@@ -31,7 +53,6 @@ export default function Hero({ onSearch }) {
           className="w-full h-full object-cover"
           alt="Modern Home Interior"
         />
-        {/* Gradient overlay from dark top to transparent bottom */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-transparent" />
       </div>
 
@@ -56,7 +77,7 @@ export default function Hero({ onSearch }) {
 
         {/* Search Container */}
         <div className="max-w-5xl mx-auto">
-          {/* Tabs - Centered */}
+          {/* Tabs */}
           <div className="flex justify-center mb-0">
             <div className="flex gap-1">
               {['All', 'For Sale', 'For Rent'].map((tab) => (
@@ -75,7 +96,7 @@ export default function Hero({ onSearch }) {
             </div>
           </div>
 
-          {/* Search Bar - Narrower Strip */}
+          {/* Search Bar */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -83,36 +104,43 @@ export default function Hero({ onSearch }) {
             className="bg-white p-3 md:p-4 rounded-2xl md:rounded-[14px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex flex-col md:flex-row items-center gap-3 relative z-10"
           >
             <div className="flex-1 w-full flex flex-col md:flex-row items-center gap-2">
+              {/* Location Dropdown */}
               <div className="relative w-full md:w-[25%]">
                 <select 
-                  value={searchFilters.region}
+                  value={filters.region}
                   onChange={(e) => handleFilterChange({ region: e.target.value })}
                   className="w-full appearance-none bg-white px-5 py-3.5 border border-gray-100 rounded-2xl text-slate-700 font-medium focus:outline-none focus:border-blue-400 transition-all cursor-pointer pr-10"
                 >
-                  <option>Location</option>
-                  {regions.map(r => <option key={r} value={r}>{r}</option>)}
+                  <option value="Location">All Locations</option>
+                  {allLocations.map(location => (
+                    <option key={location} value={location}>{location}</option>
+                  ))}
                 </select>
                 <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
 
+              {/* Property Type Dropdown */}
               <div className="relative w-full md:w-[25%]">
                 <select 
-                  value={searchFilters.type}
+                  value={filters.type}
                   onChange={(e) => handleFilterChange({ type: e.target.value })}
                   className="w-full appearance-none bg-white px-5 py-3.5 border border-gray-100 rounded-2xl text-slate-700 font-medium focus:outline-none focus:border-blue-400 transition-all cursor-pointer pr-10"
                 >
-                  <option>Property Type</option>
-                  {propertyTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                  <option value="Property Type">All Property Types</option>
+                  {allPropertyTypes.map(type => (
+                    <option key={type.id} value={type.title}>{type.title}</option>
+                  ))}
                 </select>
                 <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
 
+              {/* Price Range Inputs */}
               <div className="flex items-center gap-2 w-full md:w-[45%]">
                 <div className="relative flex-1">
                   <input 
                     type="number"
                     placeholder="Min Price"
-                    value={searchFilters.minPrice}
+                    value={filters.minPrice}
                     onChange={(e) => handleFilterChange({ minPrice: e.target.value })}
                     className="w-full bg-white px-5 py-3.5 border border-gray-100 rounded-2xl text-slate-700 font-medium focus:outline-none focus:border-blue-400 transition-all placeholder:text-gray-400"
                   />
@@ -124,7 +152,7 @@ export default function Hero({ onSearch }) {
                   <input 
                     type="number"
                     placeholder="Max Price"
-                    value={searchFilters.maxPrice}
+                    value={filters.maxPrice}
                     onChange={(e) => handleFilterChange({ maxPrice: e.target.value })}
                     className="w-full bg-white px-5 py-3.5 border border-gray-100 rounded-2xl text-slate-700 font-medium focus:outline-none focus:border-blue-400 transition-all placeholder:text-gray-400"
                   />
@@ -133,7 +161,7 @@ export default function Hero({ onSearch }) {
             </div>
 
             <button 
-              onClick={onSearch}
+              onClick={handleSearch}
               className="w-full md:w-40 bg-[#2B63E1] hover:bg-[#1E52C9] text-white px-6 py-3.5 rounded-[18px] font-bold text-base transition-all shadow-lg shadow-blue-50 active:scale-95 cursor-pointer"
             >
               Search

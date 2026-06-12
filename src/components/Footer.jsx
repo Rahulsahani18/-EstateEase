@@ -1,6 +1,6 @@
 import { Phone, Mail, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube, Send } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { mockProperties } from '../data/properties';
+import { useSelector } from 'react-redux';
 
 export default function Footer() {
   const quickLinks = [
@@ -8,8 +8,13 @@ export default function Footer() {
     { name: 'Search', path: '/search' },
     { name: 'About Us', path: '/about' },
     { name: 'Contact Us', path: '/contact' },
-    { name: 'Blog', path: '/' },
   ];
+
+  // Get properties from Redux store
+  const properties = useSelector((state) => state.properties.data);
+
+  // Take only the first 3 properties for latest properties section
+  const latestProperties = properties?.slice(0, 3) || [];
 
   return (
     <footer className="bg-slate-900 text-white pt-24 pb-12">
@@ -25,7 +30,7 @@ export default function Footer() {
                   <div className="w-2 h-2 bg-white/50 rounded-sm" />
                 </div>
               </div>
-              <span className="text-2xl font-bold tracking-tight">EstateEase</span>
+              <span className="text-lg font-bold tracking-tight">Prime Property Solutions</span>
             </Link>
             <p className="text-gray-400 text-lg leading-relaxed">
               Find your perfect property with expert guidance. We simplify the real estate journey for you.
@@ -33,11 +38,11 @@ export default function Footer() {
             <div className="space-y-4">
               <div className="flex items-center gap-4 text-gray-300">
                 <Phone size={20} className="text-gray-500" />
-                <span>(123) 345-6789</span>
+                <span>0129-6942003</span>
               </div>
               <div className="flex items-center gap-4 text-gray-300">
-                <MapPin size={20} className="text-gray-500" />
-                <span>518-520 5th Ave, New York, USA</span>
+                <MapPin size={60} className="text-gray-500" />
+                <span>1580a, Sector 62-63 Dividing Road, Near- Sai Vatika Apartments Sector-63, Faridabad</span>
               </div>
               <div className="flex items-center gap-4 text-gray-300">
                 <Mail size={20} className="text-gray-500" />
@@ -49,12 +54,20 @@ export default function Footer() {
           <div>
             <h3 className="text-xl font-bold mb-8">Latest Properties</h3>
             <div className="space-y-6">
-              {mockProperties.slice(0, 3).map((prop) => (
+              {latestProperties.map((prop) => (
                 <Link key={prop.id} to={`/property/${prop.id}`} className="flex gap-4 group cursor-pointer">
-                  <img src={prop.images[0]} className="w-20 h-20 rounded-lg object-cover" />
+                  <img 
+                    src={`https://properties.omsoftsolution.net.in/public/${prop.hero_image}`} 
+                    className="w-20 h-20 rounded-lg object-cover" 
+                    alt={prop.title}
+                  />
                   <div>
-                    <h4 className="font-semibold group-hover:text-blue-400 transition-colors">{prop.title}</h4>
-                    <p className="text-blue-500 font-bold">${prop.price.toLocaleString()}</p>
+                    <h4 className="font-semibold group-hover:text-blue-400 transition-colors line-clamp-2">
+                      {prop.title}
+                    </h4>
+                    <p className="text-blue-500 font-bold">
+                      ₹{parseFloat(prop.price).toLocaleString()}
+                    </p>
                   </div>
                 </Link>
               ))}
@@ -66,7 +79,9 @@ export default function Footer() {
             <ul className="space-y-4">
               {quickLinks.map((link) => (
                 <li key={link.name}>
-                  <Link to={link.path} className="text-gray-400 hover:text-white transition-colors text-lg cursor-pointer block">{link.name}</Link>
+                  <Link to={link.path} className="text-gray-400 hover:text-white transition-colors text-lg cursor-pointer block">
+                    {link.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -84,7 +99,7 @@ export default function Footer() {
 
         <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
           <p className="text-gray-500 font-medium">
-            © 2026 EstateEase – Modern Real Estate Platform. All rights reserved.
+            © 2026 Prime Property Solutions – Modern Real Estate Platform. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Facebook className="text-gray-500 hover:text-white cursor-pointer transition-colors" size={22} />

@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { Menu, X, Phone } from 'lucide-react';
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import logo from "../../public/assets/PPS-Photoroom.png"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,15 +19,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <Link to="/" className="flex items-center gap-2 cursor-pointer">
-            <div className="bg-blue-600 p-2 rounded-lg">
-              <div className="flex flex-wrap w-5 gap-0.5">
-                <div className="w-2 h-2 bg-white rounded-sm" />
-                <div className="w-2 h-2 bg-white rounded-sm" />
-                <div className="w-2 h-2 bg-white rounded-sm" />
-                <div className="w-2 h-2 bg-white/50 rounded-sm" />
-              </div>
-            </div>
-            <span className="text-2xl font-bold tracking-tight text-slate-900">EstateEase</span>
+
+            <img src={logo} alt="PPS Logo" className="h-10 w-auto" />
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
@@ -48,7 +42,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-6">
             <div className="flex items-center gap-2 text-slate-700">
               <Phone size={18} className="text-blue-600" />
-              <span className="font-semibold">(123) 345-6789</span>
+              <span className="font-semibold">0129-6942003</span>
             </div>
             <Link to="/contact" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all shadow-lg shadow-blue-200 cursor-pointer">
               Contact Us

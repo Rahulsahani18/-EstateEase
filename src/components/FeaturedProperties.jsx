@@ -1,3 +1,4 @@
+// src/components/FeaturedProperties.jsx
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -8,21 +9,38 @@ export default function FeaturedProperties({ onPropertyClick }) {
   const [activeTab, setActiveTab] = useState('Apartment');
   const scrollRef = useRef(null);
   const tabs = ['House', 'Apartment', 'Office', 'Land', 'Industrial'];
-  const properties = useSelector((state) => state.properties.items);
 
-  const filteredProperties = properties.filter(p => 
-    p.featured && (activeTab === 'All' || p.type === activeTab)
-  );
+  // Fix: Use 'data' instead of 'items'
+  const properties = useSelector((state) => state.properties.data);
+  const propertiesStatus = useSelector((state) => state.properties.status);
+
+  const filteredProperties = Array.isArray(properties)
+    ? properties.filter(property =>
+      property.category_name?.toLowerCase() === activeTab.toLowerCase()
+    )
+    : [];
 
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { scrollLeft, clientWidth } = scrollRef.current;
-      // Scroll by one card width (approx 25% of container)
       const cardWidth = clientWidth / 4;
       const scrollTo = direction === 'left' ? scrollLeft - cardWidth : scrollLeft + cardWidth;
       scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
     }
   };
+
+  if (propertiesStatus === 'loading') {
+    return (
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-500">Loading featured properties...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-24 bg-white">
@@ -33,11 +51,10 @@ export default function FeaturedProperties({ onPropertyClick }) {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-8 py-3 rounded-lg font-bold text-sm transition-all whitespace-nowrap cursor-pointer ${
-                  activeTab === tab 
-                    ? 'bg-blue-600 text-white shadow-lg' 
+                className={`px-8 py-3 rounded-lg font-bold text-sm transition-all whitespace-nowrap cursor-pointer ${activeTab === tab
+                    ? 'bg-blue-600 text-white shadow-lg'
                     : 'bg-white text-gray-500 hover:text-blue-600'
-                }`}
+                  }`}
               >
                 {tab}s
               </button>
@@ -45,13 +62,13 @@ export default function FeaturedProperties({ onPropertyClick }) {
           </div>
 
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={() => scroll('left')}
               className="p-3 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
             >
               <ChevronLeft size={24} />
             </button>
-            <button 
+            <button
               onClick={() => scroll('right')}
               className="p-3 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
             >
@@ -61,11 +78,11 @@ export default function FeaturedProperties({ onPropertyClick }) {
         </div>
 
         <div className="relative overflow-hidden">
-          <div 
+          <div
             ref={scrollRef}
             className="flex gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory"
           >
-            <AnimatePresence mode="popLayout transition">
+            <AnimatePresence mode="popLayout">
               {filteredProperties.length > 0 ? (
                 filteredProperties.map((property) => (
                   <motion.div
@@ -74,11 +91,11 @@ export default function FeaturedProperties({ onPropertyClick }) {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     key={property.id}
-                    className="min-w-full md:min-w-[calc(50%-0.75rem)] lg:min-w-[calc(25%-1.125rem)] snap-start"
+                    className="min-w-[280px] sm:min-w-[320px] md:min-w-[340px] lg:min-w-[360px] xl:min-w-[380px] snap-start"
                   >
-                    <PropertyCard 
-                      property={property} 
-                      onClick={() => onPropertyClick(property)} 
+                    <PropertyCard
+                      property={property}
+                      onClick={() => onPropertyClick(property)}
                     />
                   </motion.div>
                 ))

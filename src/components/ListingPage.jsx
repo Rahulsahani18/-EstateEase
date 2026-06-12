@@ -1,53 +1,88 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, SlidersHorizontal, LayoutGrid, List, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { Search, LayoutGrid, List, X, ChevronDown, ChevronRight } from 'lucide-react';
 import PropertyCard from './PropertyCard';
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { setSearchFilters } from '../store/slices/propertySlice';
+import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function ListingPage() {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { items: properties, searchFilters } = useSelector((state) => state.properties);
+  const location = useLocation();
+  
+  // Get search filters from navigation state
+  const searchFiltersFromHero = location.state?.searchFilters || {};
+  
+  // Get data from Redux store
+  const properties = useSelector((state) => state.properties.data);
+  const locations = useSelector((state) => state.locations.data);
+  const propertyTypes = useSelector((state) => state.propertyTypes.data);
+  
+  // Initialize filters with values from Hero search
+  const [filters, setFilters] = useState({
+    status: searchFiltersFromHero.status || 'All',
+    region: searchFiltersFromHero.region || 'Location',
+    type: searchFiltersFromHero.type || 'Property Type',
+    minPrice: searchFiltersFromHero.minPrice || '',
+    maxPrice: searchFiltersFromHero.maxPrice || '',
+    beds: 'Bedrooms',
+    baths: 'Bathrooms',
+    minSize: '',
+    query: '',
+  });
+  
   const [viewMode, setViewMode] = useState('grid');
 
-  const filteredProperties = properties.filter(property => {
-    const matchesType = searchFilters.type === 'Property Type' || property.type === searchFilters.type;
-    const matchesStatus = searchFilters.status === 'All' || property.status === searchFilters.status;
-    const matchesRegion = searchFilters.region === 'Region' || 
-                         property.location.toLowerCase().includes(searchFilters.region.toLowerCase()) ||
-                         property.area?.toLowerCase().includes(searchFilters.region.toLowerCase());
+  // Apply filters to properties
+  const filteredProperties = Array.isArray(properties) ? properties.filter(property => {
+    // Status filter
+    const matchesStatus = filters.status === 'All' || property.offer_type === filters.status;
     
-    // Price filter
-    const matchesMinPrice = !searchFilters.minPrice || property.price >= parseInt(searchFilters.minPrice);
-    const matchesMaxPrice = !searchFilters.maxPrice || property.price <= parseInt(searchFilters.maxPrice);
+    // Property type filter
+    const matchesType = filters.type === 'Property Type' || property.category_name === filters.type;
     
-    let matchesPriceOption = true;
-    if (searchFilters.price !== 'Price') {
-      const price = property.price;
-      if (searchFilters.price === '$500k - $1M') matchesPriceOption = price >= 500000 && price <= 1000000;
-      else if (searchFilters.price === '$1M - $5M') matchesPriceOption = price > 1000000 && price <= 5000000;
-      else if (searchFilters.price === '$5M+') matchesPriceOption = price > 5000000;
-      else if (searchFilters.price === '< $50,000') matchesPriceOption = price < 50000;
-    }
+    // Location filter
+    const matchesRegion = filters.region === 'Location' || 
+                         property.location_name?.toLowerCase().includes(filters.region.toLowerCase()) ||
+                         property.area?.toLowerCase().includes(filters.region.toLowerCase());
+    
+    // Price range filter
+    const propertyPrice = parseFloat(property.price);
+    const matchesMinPrice = !filters.minPrice || propertyPrice >= parseFloat(filters.minPrice);
+    const matchesMaxPrice = !filters.maxPrice || propertyPrice <= parseFloat(filters.maxPrice);
+    
+    // Bedrooms filter
+    const matchesBeds = filters.beds === 'Bedrooms' || parseInt(property.bedrooms) >= parseInt(filters.beds);
+    
+    // Bathrooms filter
+    const matchesBaths = filters.baths === 'Bathrooms' || parseInt(property.bathrooms) >= parseInt(filters.baths);
+    
+    // Size filter
+    const propertySize = parseInt(property.property_size.replace(/,/g, ''));
+    const matchesSize = !filters.minSize || propertySize >= parseInt(filters.minSize);
+    
+    // Search query filter
+    const matchesQuery = !filters.query || 
+                        property.title.toLowerCase().includes(filters.query.toLowerCase()) ||
+                        property.location_name?.toLowerCase().includes(filters.query.toLowerCase());
 
-    // New filters
-    const matchesBeds = searchFilters.beds === 'Bedrooms' || property.beds >= parseInt(searchFilters.beds);
-    const matchesBaths = searchFilters.baths === 'Bathrooms' || property.baths >= parseInt(searchFilters.baths);
-    const matchesSize = !searchFilters.minSize || property.sqft >= parseInt(searchFilters.minSize);
-    const matchesQuery = !searchFilters.query || 
-                        property.title.toLowerCase().includes(searchFilters.query.toLowerCase()) ||
-                        property.location.toLowerCase().includes(searchFilters.query.toLowerCase());
+    return matchesStatus && matchesType && matchesRegion && matchesMinPrice && 
+           matchesMaxPrice && matchesBeds && matchesBaths && matchesSize && matchesQuery;
+  }) : [];
 
-    return matchesType && matchesStatus && matchesRegion && matchesPriceOption && matchesMinPrice && matchesMaxPrice && matchesBeds && matchesBaths && matchesSize && matchesQuery;
-  });
+  // Get unique locations for filter dropdown
+  const uniqueLocations = [...new Set(locations.map(loc => loc.title))];
+  
+  // Get ALL property types from API (no filtering)
+  const allPropertyTypes = Array.isArray(propertyTypes) ? propertyTypes : [];
+
+  const updateFilter = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
 
   const removeFilter = (key) => {
     const defaults = { 
       type: 'Property Type', 
-      region: 'Region', 
-      price: 'Price', 
+      region: 'Location', 
       status: 'All', 
       beds: 'Bedrooms', 
       baths: 'Bathrooms',
@@ -56,23 +91,29 @@ export default function ListingPage() {
       minPrice: '',
       maxPrice: '',
     };
-    dispatch(setSearchFilters({ [key]: defaults[key] }));
+    setFilters(prev => ({ ...prev, [key]: defaults[key] }));
   };
 
   const clearAll = () => {
-    dispatch(setSearchFilters({
+    setFilters({
+      status: 'All',
+      region: 'Location',
       type: 'Property Type',
-      region: 'Region',
-      price: 'Price',
+      minPrice: '',
+      maxPrice: '',
       beds: 'Bedrooms',
       baths: 'Bathrooms',
       minSize: '',
-      status: 'All',
       query: '',
-      minPrice: '',
-      maxPrice: '',
-    }));
+    });
   };
+
+  // Debug: Log applied filters and property types
+  useEffect(() => {
+    console.log('All Property Types from API:', allPropertyTypes);
+    console.log('Applied Filters:', filters);
+    console.log('Filtered Properties Count:', filteredProperties.length);
+  }, [filters, filteredProperties, allPropertyTypes]);
 
   return (
     <div className="min-h-screen bg-gray-50/30 pt-32 pb-24 font-sans">
@@ -81,185 +122,161 @@ export default function ListingPage() {
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-8 font-medium">
           <span className="hover:text-blue-600 transition-colors cursor-pointer" onClick={() => navigate('/')}>Home</span>
           <ChevronRight size={14} className="text-gray-300" />
-          <span className="hover:text-blue-600 transition-colors cursor-pointer" onClick={() => navigate('/search')}>Search Results</span>
-          {searchFilters.type !== 'Property Type' && (
+          <span className="text-slate-900">Search Results</span>
+          {filters.type !== 'Property Type' && (
             <>
               <ChevronRight size={14} className="text-gray-300" />
-              <span className="text-slate-900">{searchFilters.type}s</span>
+              <span className="text-slate-900">{filters.type}s</span>
             </>
           )}
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           
-          {/* Sidebar FILTERS - Matching Screenshot */}
+          {/* Sidebar FILTERS */}
           <aside className="w-full lg:w-80 space-y-6 shrink-0">
             <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100">
               {/* Offer Type */}
               <div className="space-y-6 mb-10">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest flex items-center justify-between">
-                  Offer Type
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#1A73E8]" />
-                </h3>
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Offer Type</h3>
                 <div className="space-y-4">
                   {['For Sale', 'For Rent'].map((status) => (
-                    <label key={status} className="flex items-center gap-4 cursor-pointer group" onClick={() => dispatch(setSearchFilters({ status: searchFilters.status === status ? 'All' : status }))}>
-                      <div className={`w-6 h-6 border rounded-lg flex items-center justify-center transition-all ${searchFilters.status === status ? 'border-[#1A73E8] bg-[#1A73E8]' : 'border-gray-200 group-hover:border-[#1A73E8]'}`}>
-                        {searchFilters.status === status && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                    <label key={status} className="flex items-center gap-4 cursor-pointer group" onClick={() => updateFilter('status', filters.status === status ? 'All' : status)}>
+                      <div className={`w-6 h-6 border rounded-lg flex items-center justify-center transition-all ${filters.status === status ? 'border-blue-600 bg-blue-600' : 'border-gray-200'}`}>
+                        {filters.status === status && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                       </div>
-                      <span className={`text-base transition-colors ${searchFilters.status === status ? 'text-slate-900 font-bold' : 'text-slate-500 font-medium group-hover:text-slate-900'}`}>{status}</span>
+                      <span className={`text-base ${filters.status === status ? 'text-slate-900 font-bold' : 'text-slate-500'}`}>{status}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              {/* Property Type */}
-              <div className="space-y-6 mb-10">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest flex items-center justify-between">
-                  Property Type
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#F9AB00]" />
-                </h3>
-                <div className="space-y-4">
-                  {['Apartment', 'House', 'Land', 'Office'].map((type) => (
-                    <label key={type} className="flex items-center gap-4 cursor-pointer group" onClick={() => dispatch(setSearchFilters({ type: searchFilters.type === type ? 'Property Type' : type }))}>
-                      <div className={`w-6 h-6 border rounded-lg flex items-center justify-center transition-all ${searchFilters.type === type ? 'border-[#1A73E8] bg-[#1A73E8]' : 'border-gray-200 group-hover:border-[#1A73E8]'}`}>
-                        {searchFilters.type === type && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
-                      </div>
-                      <span className={`text-base transition-colors ${searchFilters.type === type ? 'text-slate-900 font-bold' : 'text-slate-500 font-medium group-hover:text-slate-900'}`}>{type}s</span>
-                    </label>
-                  ))}
+              {/* Location - Moved ABOVE Property Type */}
+              <div className="space-y-4 mb-10">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Location</h3>
+                <div className="relative">
+                  <select 
+                    value={filters.region}
+                    onChange={(e) => updateFilter('region', e.target.value)}
+                    className="w-full appearance-none bg-gray-50 px-4 py-3 rounded-xl text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer"
+                  >
+                    <option value="Location">All Locations</option>
+                    {uniqueLocations.map(location => (
+                      <option key={location} value={location}>{location}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Property Type - Now a dropdown like location */}
+              <div className="space-y-4 mb-10">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Property Type</h3>
+                <div className="relative">
+                  <select 
+                    value={filters.type}
+                    onChange={(e) => updateFilter('type', e.target.value)}
+                    className="w-full appearance-none bg-gray-50 px-4 py-3 rounded-xl text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer"
+                  >
+                    <option value="Property Type">All Property Types</option>
+                    {allPropertyTypes.map((type) => (
+                      <option key={type.id} value={type.title}>{type.title}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 </div>
               </div>
 
               {/* Bedrooms */}
               <div className="space-y-4 mb-10">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest flex items-center justify-between">
-                  Bedrooms
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#34A853]" />
-                </h3>
-                <div className="relative group/select">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Bedrooms</h3>
+                <div className="relative">
                   <select 
-                    value={searchFilters.beds}
-                    onChange={(e) => dispatch(setSearchFilters({ beds: e.target.value }))}
-                    className="w-full appearance-none bg-[#F7F9FC] px-6 py-4 border-none rounded-2xl text-base text-slate-600 font-medium tracking-tight cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#1E90FF]/30"
+                    value={filters.beds}
+                    onChange={(e) => updateFilter('beds', e.target.value)}
+                    className="w-full appearance-none bg-gray-50 px-4 py-3 rounded-xl text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer"
                   >
                     <option>Bedrooms</option>
                     {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}+ Bedrooms</option>)}
                   </select>
-                  <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 </div>
               </div>
 
               {/* Bathrooms */}
               <div className="space-y-4 mb-10">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest flex items-center justify-between">
-                  Bathrooms
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#A142F4]" />
-                </h3>
-                <div className="relative group/select">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Bathrooms</h3>
+                <div className="relative">
                   <select 
-                    value={searchFilters.baths}
-                    onChange={(e) => dispatch(setSearchFilters({ baths: e.target.value }))}
-                    className="w-full appearance-none bg-[#F7F9FC] px-6 py-4 border-none rounded-2xl text-base text-slate-600 font-medium tracking-tight cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#1E90FF]/30"
+                    value={filters.baths}
+                    onChange={(e) => updateFilter('baths', e.target.value)}
+                    className="w-full appearance-none bg-gray-50 px-4 py-3 rounded-xl text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer"
                   >
                     <option>Bathrooms</option>
                     {[1,2,3,4].map(n => <option key={n} value={n}>{n}+ Bathrooms</option>)}
                   </select>
-                  <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Property Size */}
-              <div className="space-y-4 mb-10">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest flex items-center justify-between">
-                  Location
-                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400" />
-                </h3>
-                <div className="relative group/select">
-                  <select 
-                    value={searchFilters.region}
-                    onChange={(e) => dispatch(setSearchFilters({ region: e.target.value }))}
-                    className="w-full appearance-none bg-[#F7F9FC] px-6 py-4 border-none rounded-2xl text-base text-slate-600 font-medium tracking-tight cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#1E90FF]/30"
-                  >
-                    <option value="Region">All Regions</option>
-                    {['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'].map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
-                  <ChevronDown size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 </div>
               </div>
 
               <button 
                 onClick={clearAll}
-                className="w-full mt-6 py-4 rounded-2xl border border-gray-100 text-xs font-bold text-slate-400 uppercase tracking-widest hover:bg-slate-50 hover:text-slate-900 transition-all active:scale-95 shadow-sm"
+                className="w-full mt-6 py-4 rounded-2xl border border-gray-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all"
               >
                 Reset Filters
               </button>
             </div>
           </aside>
 
-          {/* Main Content RESULTS */}
+          {/* Main Content */}
           <main className="flex-1 min-w-0">
-            {/* Header Controls */}
-            <div className="flex flex-col mb-8 p-1">
-              <div className="flex flex-col md:flex-row items-baseline gap-4 mb-2">
-                <h1 className="text-4xl font-bold text-slate-900 tracking-tight">{filteredProperties.length} Results</h1>
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{searchFilters.type === 'Property Type' ? 'All Properties' : searchFilters.type + 's'}</span>
+            <div className="flex flex-col mb-8">
+              <h1 className="text-4xl font-bold text-slate-900 tracking-tight">{filteredProperties.length} Results</h1>
+              <p className="text-gray-500 text-sm mt-2">Properties that match your criteria</p>
+
+              {/* Active Filters */}
+              <div className="flex flex-wrap items-center gap-3 mt-6 border-b border-gray-200 pb-6">
+                <AnimatePresence mode="popLayout">
+                  {filters.type !== 'Property Type' && (
+                    <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }} className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-full text-xs font-semibold">
+                      {filters.type}
+                      <button onClick={() => removeFilter('type')} className="hover:rotate-90 transition-transform cursor-pointer"><X size={14} /></button>
+                    </motion.div>
+                  )}
+                  {filters.region !== 'Location' && (
+                    <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }} className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-full text-xs font-semibold">
+                      {filters.region}
+                      <button onClick={() => removeFilter('region')} className="hover:rotate-90 transition-transform cursor-pointer"><X size={14} /></button>
+                    </motion.div>
+                  )}
+                  {filters.status !== 'All' && (
+                    <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }} className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-full text-xs font-semibold">
+                      {filters.status}
+                      <button onClick={() => removeFilter('status')} className="hover:rotate-90 transition-transform cursor-pointer"><X size={14} /></button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                {(filters.type !== 'Property Type' || filters.region !== 'Location' || filters.status !== 'All') && (
+                  <button onClick={clearAll} className="text-gray-500 text-xs cursor-pointer hover:text-blue-600 ">Clear all</button>
+                )}
               </div>
-              <p className="text-gray-500 text-sm mb-8 font-medium">Find properties that meet your specific architectural criteria.</p>
 
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-200 pb-6">
-                <div className="flex flex-wrap items-center gap-3">
-                  <AnimatePresence mode="popLayout">
-                    {searchFilters.type !== 'Property Type' && (
-                      <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }} className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-widest">
-                        {searchFilters.type}S
-                        <button onClick={() => removeFilter('type')} className="hover:rotate-90 transition-transform"><X size={14} /></button>
-                      </motion.div>
-                    )}
-                    {searchFilters.price !== 'Price' && (
-                      <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }} className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-widest">
-                        {searchFilters.price}
-                        <button onClick={() => removeFilter('price')} className="hover:rotate-90 transition-transform"><X size={14} /></button>
-                      </motion.div>
-                    )}
-                    {searchFilters.region !== 'Region' && (
-                      <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }} className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-widest">
-                        {searchFilters.region.toUpperCase()}
-                        <button onClick={() => removeFilter('region')} className="hover:rotate-90 transition-transform"><X size={14} /></button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  <button onClick={clearAll} className="text-gray-500 text-xs font-bold hover:text-blue-600 px-2">Clear all</button>
-                </div>
-
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium text-slate-900">Sort by:</span>
-                    <div className="flex items-center gap-6 bg-white border border-gray-200 px-4 py-2.5 rounded-sm min-w-[200px] justify-between cursor-pointer group">
-                      <span className="text-sm font-medium text-slate-600">Most Relevant</span>
-                      <ChevronDown size={14} className="text-gray-400 group-hover:text-slate-900 transition-colors" />
-                    </div>
-                  </div>
-                  
-                  <div className="flex bg-white border border-gray-200 rounded-sm overflow-hidden">
-                    <button 
-                      onClick={() => setViewMode('grid')}
-                      className={`p-3 transition-all ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-slate-900'}`}>
-                      <LayoutGrid size={20} />
-                    </button>
-                    <button 
-                      onClick={() => setViewMode('list')}
-                      className={`p-3 transition-all ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-slate-900'}`}>
-                      <List size={20} />
-                    </button>
-                  </div>
+              {/* View Toggle */}
+              <div className="flex justify-end mt-4">
+                <div className="flex bg-white border border-gray-200 rounded-lg overflow-hidden">
+                  <button onClick={() => setViewMode('grid')} className={`p-2 px-4 cursor-pointer ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'text-gray-500'}`}>
+                    <LayoutGrid size={18} />
+                  </button>
+                  <button onClick={() => setViewMode('list')} className={`p-2 px-4 cursor-pointer ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-500'}`}>
+                    <List size={18} />
+                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Grid */}
+            {/* Properties Grid/List */}
             {filteredProperties.length > 0 ? (
-              <div className={`grid gap-10 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-2' : 'grid-cols-1'}`}>
+              <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-2' : 'grid-cols-1'}`}>
                 {filteredProperties.map((property) => (
                   <PropertyCard 
                     key={property.id} 
@@ -270,12 +287,12 @@ export default function ListingPage() {
               </div>
             ) : (
               <div className="bg-white rounded-xl border border-gray-100 p-20 text-center">
-                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Search size={32} className="text-gray-300" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">No matching properties</h3>
-                <p className="text-gray-500 mb-8">Try adjusting your filters or clearing them to see more results.</p>
-                <button onClick={clearAll} className="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors">Clear All Filters</button>
+                <Search size={48} className="text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-slate-900 mb-2">No properties found</h3>
+                <p className="text-gray-500">Try adjusting your filters to see more results.</p>
+                <button onClick={clearAll} className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700">
+                  Clear All Filters
+                </button>
               </div>
             )}
           </main>
